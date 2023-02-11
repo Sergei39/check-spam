@@ -7,6 +7,21 @@ import (
 	"time"
 )
 
+var PullReasons = map[int]string{
+	0: "blacklist",
+	1: "stop_word",
+	2: "obscene",
+	3: "email",
+	4: "link",
+	5: "numeric",
+	6: "quality_message",
+}
+
+var PullPermissions = map[int]string{
+	0: "allowed",
+	1: "not_allowed",
+}
+
 func (i *Implementation) GetPermissions(c echo.Context) error {
 	req := new(GetPermissionsReq)
 	err := c.Bind(req)
@@ -14,10 +29,19 @@ func (i *Implementation) GetPermissions(c echo.Context) error {
 		return err
 	}
 
-	sleepRand := rand.Intn(1000)
-	time.Sleep(time.Millisecond * time.Duration(sleepRand))
+	randSleep := rand.Intn(700)
+	time.Sleep(time.Millisecond * time.Duration(randSleep))
 
-	res := new(GetPermissionsRes)
+	randPermission := PullPermissions[rand.Intn(10)%2]
+	randReason := PullReasons[rand.Intn(100)%7]
+
+	res := &GetPermissionsRes{
+		Permission: randPermission,
+	}
+
+	if randPermission == "not_allowed" {
+		res.Reason = randReason
+	}
 
 	return c.JSON(http.StatusOK, res)
 }
