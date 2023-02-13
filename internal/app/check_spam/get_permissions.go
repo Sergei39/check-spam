@@ -29,19 +29,36 @@ func (i *Implementation) GetPermissions(c echo.Context) error {
 		return err
 	}
 
-	randSleep := rand.Intn(700)
-	time.Sleep(time.Millisecond * time.Duration(randSleep))
+	res, _ := i.getPermissions(req)
 
-	randPermission := PullPermissions[rand.Intn(10)%2]
-	randReason := PullReasons[rand.Intn(100)%7]
+	return c.JSON(http.StatusOK, res)
+}
 
-	res := &GetPermissionsRes{
-		Permission: randPermission,
+func (i *Implementation) getPermissions(req *GetPermissionsReq) (*GetPermissionsRes, error) {
+	// искусственная нагрузка
+
+	perNumber := 0
+	for _, s := range req.MessageText {
+		for j := 0; j < 10000; j++ {
+			for k := 0; k < 1000; k++ {
+				perNumber += int(s) + j + k
+			}
+		}
 	}
 
-	if randPermission == "not_allowed" {
+	randSleep := rand.Intn(100)
+	time.Sleep(time.Millisecond * time.Duration(randSleep))
+
+	permission := PullPermissions[perNumber%2]
+	res := &GetPermissionsRes{
+		Permission: permission,
+	}
+
+	randReason := PullReasons[rand.Intn(100)%7]
+
+	if permission == "not_allowed" {
 		res.Reason = randReason
 	}
 
-	return c.JSON(http.StatusOK, res)
+	return res, nil
 }
